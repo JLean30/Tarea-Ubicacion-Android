@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -28,17 +29,31 @@ public class MainActivity extends AppCompatActivity {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         permision = "android.permission.ACCESS_COARSE_LOCATION";
-        checkPermission(permision,1);
+
 
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(!checkPermissions()){
+            requestPermision(permision,1);
+            obteinLocation();
+        }
+        obteinLocation();
+    }
+
+    private boolean checkPermissions() {
+        int permissionState = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION);
+        return permissionState == PackageManager.PERMISSION_GRANTED;
+    }
     private void obteinLocation(){
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-
                         if (location != null) {
                             latitude.setText("latitude: "+ location.getLatitude());
                             longitude.setText("longitude: "+ location.getLongitude());
@@ -48,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Function to check and request permission
-    public void checkPermission(String permission, int requestCode)
+    public void requestPermision(String permission, int requestCode)
     {
 
         // Checking if permission is not granted
@@ -61,11 +76,12 @@ public class MainActivity extends AppCompatActivity {
                             MainActivity.this,
                             new String[] { permission },
                             requestCode);
-            obteinLocation();
-        }
-        else {
-            obteinLocation();
 
         }
+        else {
+
+
+        }
+
     }
 }
